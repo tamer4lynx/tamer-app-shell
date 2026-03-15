@@ -5,13 +5,26 @@ import { useLocation } from 'react-router'
 import { useInsets, useKeyboard } from 'tamer-insets'
 import { useSafeAreaContext } from 'tamer-screen'
 import { Icon, type IconSet } from 'tamer-icons'
-import { useTamerRouter } from 'tamer-router'
 import type { ReactNode } from '@lynx-js/react'
 import type { ViewProps } from '@lynx-js/types'
 
+import { SafeArea, Screen } from 'tamer-screen'
 export { Screen, SafeArea, useSafeAreaContext } from 'tamer-screen'
 
-const DEFAULT_BAR_HEIGHT = 144
+export interface AppShellRouterContextValue {
+  back: () => void
+  canGoBack: () => boolean
+  replace: (route: string, options?: { mode?: string; direction?: string; tab?: boolean }) => void
+}
+
+export const AppShellRouterContext = createContext<AppShellRouterContextValue | null>(null)
+
+export function useAppShellRouter(): AppShellRouterContextValue | null {
+  return useContext(AppShellRouterContext)
+}
+
+const DEFAULT_BAR_HEIGHT = 56
+export const px = (value: number) => `${Math.round(value)}px`
 
 export interface AppShellContextValue {
   showAppBar: boolean
@@ -40,8 +53,8 @@ export interface AppBarProps extends ViewProps {
   actionColor?: string
 }
 
-const ACTION_SIZE = 128
-const ACTION_ICON_SIZE = 72
+const ACTION_SIZE = 48
+const ACTION_ICON_SIZE = 32
 
 function ActionButton({ action, color = '#fff' }: { action: AppBarAction; color?: string }) {
   const [pressed, setPressed] = useState(false)
@@ -49,9 +62,9 @@ function ActionButton({ action, color = '#fff' }: { action: AppBarAction; color?
     <view
       className={`AppShellActionButton${pressed ? ' AppShellActionButton--pressed' : ''}`}
       style={{
-        width: ACTION_SIZE,
-        height: ACTION_SIZE,
-        borderRadius: ACTION_SIZE / 2,
+        width: px(ACTION_SIZE),
+        height: px(ACTION_SIZE),
+        borderRadius: px(ACTION_SIZE / 2),
         overflow: 'hidden',
       }}
       bindtap={action.onTap}
@@ -79,7 +92,9 @@ export function AppBar({
   const insets = useInsets()
   const safeArea = useSafeAreaContext()
   const isSafeAreaChild = safeArea?.hasTop ?? false
-  const { back, canGoBack } = useTamerRouter()
+  const router = useAppShellRouter()
+  const back = router?.back ?? (() => {})
+  const canGoBack = router?.canGoBack ?? (() => false)
   const resolvedTitleColor = foregroundColor
   const resolvedActionColor = actionColor ?? foregroundColor
 
@@ -99,11 +114,12 @@ export function AppBar({
       </view>
     ) : null
 
+  const effectiveBarHeight = isSafeAreaChild ? DEFAULT_BAR_HEIGHT + insets.top : barHeight
   return (
     <view
       style={{
-        height: barHeight + (isSafeAreaChild ? insets.top : 0),
-        ...(isSafeAreaChild ? { marginTop: -insets.top, paddingTop: insets.top } : {}),
+        height: px(effectiveBarHeight),
+        ...(isSafeAreaChild ? { marginTop: `-${Math.round(insets.top)}px`, paddingTop: px(insets.top) } : {}),
         paddingLeft: '16px',
         paddingRight: '16px',
         display: 'flex',
@@ -111,17 +127,17 @@ export function AppBar({
         justifyContent: 'space-between',
         alignItems: 'center',
         flexShrink: 0,
-        borderBottomWidth: 1,
+        borderBottomWidth: '1px',
         borderBottomColor: '#e0e0e0',
         ...(style as object ?? {}),
       }}
       {...rest}
     >
-      <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: ACTION_SIZE }}>
+      <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: px(ACTION_SIZE) }}>
         {left}
       </view>
-      {children ?? (title ? <text style={{ display: 'block', width: '100%', fontWeight: 'bold', fontSize: 48, textAlign: 'center', color: resolvedTitleColor }}>{title}</text> : <view style={{ flex: 1 }} />)}
-      <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: ACTION_SIZE, justifyContent: 'flex-end' }}>
+      {children ?? (title ? <text style={{ display: 'block', width: '100%', fontWeight: 'bold', fontSize: px(18), textAlign: 'center', color: resolvedTitleColor }}>{title}</text> : <view style={{ flex: 1 }} />)}
+      <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: px(ACTION_SIZE), justifyContent: 'flex-end' }}>
         {right}
       </view>
     </view>
@@ -170,9 +186,9 @@ function TabBarItem({
       bindtouchend={() => setPressed(false)}
       bindtouchcancel={() => setPressed(false)}
     >
-      <Icon name={item.icon} set={item.set ?? 'material'} size={64} color={iconC} />
+      <Icon name={item.icon} set={item.set ?? 'material'} size={24} color={iconC} />
       {item.label ? (
-        <text style={{ marginTop: 4, color: iconC }}>{item.label}</text>
+        <text style={{ marginTop: px(4), color: iconC }}>{item.label}</text>
       ) : null}
     </view>
   )
@@ -183,7 +199,8 @@ export function TabBar({ tabs, iconColor, style, ...rest }: TabBarProps) {
   const keyboard = useKeyboard()
   const safeArea = useSafeAreaContext()
   const isSafeAreaChild = safeArea?.hasBottom ?? false
-  const { replace } = useTamerRouter()
+  const router = useAppShellRouter()
+  const replace = router?.replace ?? (() => {})
   const location = useLocation()
 
   const handleTap = useCallback(
@@ -194,15 +211,13 @@ export function TabBar({ tabs, iconColor, style, ...rest }: TabBarProps) {
         return
       }
       const pathname = location.pathname || '/'
-      const currentIdx = tabs.findIndex((t) => {
+      const isCurrent = (t: TabItem) => {
         const p = t.path || '/'
         if (p === '/') return pathname === '/' || pathname === ''
         return pathname === p || pathname.startsWith(p + '/')
-      })
-      const newIdx = tabs.findIndex((t) => (t.path || '/') === (item.path || '/'))
-      if (currentIdx === newIdx || newIdx < 0) return
-      const direction = currentIdx < 0 || newIdx > currentIdx ? 'right' : 'left'
-      replace(item.path, { mode: 'scroll', direction })
+      }
+      if (isCurrent(item)) return
+      replace(item.path, { tab: true })
     },
     [replace, tabs, location.pathname]
   )
@@ -210,28 +225,35 @@ export function TabBar({ tabs, iconColor, style, ...rest }: TabBarProps) {
   return (
     <view
       style={{
-        ...(isSafeAreaChild ? { marginBottom: -insets.bottom } : {}),
+        ...(isSafeAreaChild ? { marginBottom: `-${Math.round(insets.bottom)}px` } : {}),
         flexDirection: 'row',
-        paddingLeft: 8,
-        paddingRight: 8,
+        paddingLeft: px(8),
+        paddingRight: px(8),
         alignItems: 'center',
         justifyContent: 'space-around',
-        borderTopWidth: 1,
+        borderTopWidth: '1px',
         borderTopColor: '#e0e0e0',
-        ...keyboard.visible ? { position: 'absolute', display: 'block', overflow: 'hidden', maxHeight: 0, height: 0, paddingBottom: 0, paddingTop: 0, bottom: -50 } : { display: 'flex', paddingBottom: insets.bottom, paddingTop: 12 },
+        ...keyboard.visible ? { position: 'absolute', display: 'block', overflow: 'hidden', maxHeight: '0px', height: '0px', paddingBottom: '0px', paddingTop: '0px', bottom: '-50px' } : { display: 'flex', paddingBottom: px(insets.bottom), paddingTop: px(12) },
         ...(style as object ?? {}),
       }}
       {...rest}
     >
-      {tabs.map((item, i) => (
-        <TabBarItem
-          key={i}
-          item={item}
-          isActive={item.path ? location.pathname === item.path : false}
-          onTap={() => handleTap(item)}
-          iconColor={iconColor}
-        />
-      ))}
+      {tabs.map((item, i) => {
+        const pathname = location.pathname || '/'
+        const p = item.path || '/'
+        const isActive = item.path
+          ? p === '/' ? pathname === '/' || pathname === '' : pathname === p || pathname.startsWith(p + '/')
+          : false
+        return (
+          <TabBarItem
+            key={i}
+            item={item}
+            isActive={isActive}
+            onTap={() => handleTap(item)}
+            iconColor={iconColor}
+          />
+        )
+      })}
     </view>
   )
 }

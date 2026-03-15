@@ -24,7 +24,6 @@
   "dependencies": {
     "tamer-icons": "file:../tamer-icons",
     "tamer-insets": "file:../tamer-insets",
-    "tamer-router": "file:../tamer-router",
     "tamer-screen": "file:../tamer-screen"
   },
   "devDependencies": {
