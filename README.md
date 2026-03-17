@@ -5,7 +5,7 @@ App chrome: AppBar, TabBar, and Content layout for Lynx.
 ## Installation
 
 ```bash
-npm install tamer-app-shell
+npm install @tamer4lynx/tamer-app-shell
 ```
 
 Add to your app's dependencies and run `t4l link`. Depends on **tamer-icons**, **tamer-insets**, **tamer-router**, **tamer-screen**.
@@ -22,7 +22,7 @@ import {
   SafeArea,
   useAppShellContext,
   useAppShellRouter,
-} from 'tamer-app-shell'
+} from '@tamer4lynx/tamer-app-shell'
 
 // Wrap app with provider
 <AppShellProvider showAppBar showTabBar barHeight={56}>

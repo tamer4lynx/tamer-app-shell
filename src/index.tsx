@@ -2,14 +2,14 @@
 import './app-shell.css'
 import { createContext, useCallback, useContext, useState } from '@lynx-js/react'
 import { useLocation } from 'react-router'
-import { useInsets, useKeyboard } from 'tamer-insets'
-import { useSafeAreaContext } from 'tamer-screen'
-import { Icon, type IconSet } from 'tamer-icons'
+import { useInsets, useKeyboard } from '@tamer4lynx/tamer-insets'
+import { useSafeAreaContext } from '@tamer4lynx/tamer-screen'
+import { Icon, type IconSet } from '@tamer4lynx/tamer-icons'
 import type { ReactNode } from '@lynx-js/react'
 import type { ViewProps } from '@lynx-js/types'
 
-import { SafeArea, Screen } from 'tamer-screen'
-export { Screen, SafeArea, useSafeAreaContext } from 'tamer-screen'
+import { SafeArea, Screen } from '@tamer4lynx/tamer-screen'
+export { Screen, SafeArea, useSafeAreaContext } from '@tamer4lynx/tamer-screen'
 
 export interface AppShellRouterContextValue {
   back: () => void

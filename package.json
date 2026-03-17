@@ -1,6 +1,7 @@
 {
-  "name": "tamer-app-shell",
-  "version": "0.1.0",
+  "name": "@tamer4lynx/tamer-app-shell",
+  "publishConfig": { "access": "public", "tag": "prerelease" },
+  "version": "0.0.1",
   "type": "module",
   "description": "App chrome: AppBar, TabBar, and Content layout for Lynx.",
   "main": "dist/src/index.js",
@@ -12,19 +13,21 @@
       "default": "./dist/src/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "peerDependencies": {
     "@lynx-js/react": ">=0.100.0",
     "react": "^17.0.0",
     "react-router": "^6.0.0"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc && cp src/app-shell.css dist/src/app-shell.css"
   },
   "dependencies": {
-    "tamer-icons": "file:../tamer-icons",
-    "tamer-insets": "file:../tamer-insets",
-    "tamer-screen": "file:../tamer-screen"
+    "@tamer4lynx/tamer-icons": "^0.0.1",
+    "@tamer4lynx/tamer-insets": "^0.0.1",
+    "@tamer4lynx/tamer-screen": "^0.0.1"
   },
   "devDependencies": {
     "@lynx-js/react": "^0.112.1",
@@ -36,6 +39,14 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tamer4lynx/tamer-app-shell.git"
+  },
+  "homepage": "https://github.com/tamer4lynx/tamer-app-shell#readme",
+  "bugs": {
+    "url": "https://github.com/tamer4lynx/tamer-app-shell/issues"
   },
   "author": "Nanofuxion",
   "license": "MIT"
