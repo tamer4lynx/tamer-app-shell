@@ -1,16 +1,16 @@
 {
   "name": "@tamer4lynx/tamer-app-shell",
   "publishConfig": { "access": "public", "tag": "prerelease" },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "App chrome: AppBar, TabBar, and Content layout for Lynx.",
-  "main": "dist/src/index.js",
+  "main": "dist/src/index.jsx",
   "types": "dist/src/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "import": "./dist/src/index.js",
-      "default": "./dist/src/index.js"
+      "import": "./dist/src/index.jsx",
+      "default": "./dist/src/index.jsx"
     }
   },
   "files": [
@@ -22,16 +22,14 @@
     "react-router": "^6.0.0"
   },
   "scripts": {
-    "build": "tsc && cp src/app-shell.css dist/src/app-shell.css"
+    "build": "rm -rf dist && tsc && cp src/app-shell.css dist/src/app-shell.css"
   },
   "dependencies": {
-    "@tamer4lynx/tamer-icons": "^0.0.1",
+    "@tamer4lynx/tamer-icons": "^0.0.2",
     "@tamer4lynx/tamer-insets": "^0.0.1",
-    "@tamer4lynx/tamer-screen": "^0.0.1"
+    "@tamer4lynx/tamer-screen": "^0.0.2"
   },
   "devDependencies": {
-    "@lynx-js/react": "^0.112.1",
-    "@lynx-js/types": "3.3.0",
     "@types/react": "^17.0.0",
     "react": "^17.0.2",
     "react-router": "^6.28.0",
