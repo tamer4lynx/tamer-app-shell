@@ -1,7 +1,7 @@
 {
   "name": "@tamer4lynx/tamer-app-shell",
   "publishConfig": { "access": "public", "tag": "prerelease" },
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "description": "App chrome: AppBar, TabBar, and Content layout for Lynx.",
   "main": "dist/src/index.jsx",
@@ -25,7 +25,7 @@
     "build": "rm -rf dist && tsc && cp src/app-shell.css dist/src/app-shell.css"
   },
   "dependencies": {
-    "@tamer4lynx/tamer-icons": "^0.0.2",
+    "@tamer4lynx/tamer-icons": "^0.0.5",
     "@tamer4lynx/tamer-insets": "^0.0.1",
     "@tamer4lynx/tamer-screen": "^0.0.2"
   },

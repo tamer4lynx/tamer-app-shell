@@ -4,7 +4,8 @@ import { createContext, useCallback, useContext, useState } from '@lynx-js/react
 import { useLocation } from 'react-router'
 import { useInsets, useKeyboard } from '@tamer4lynx/tamer-insets'
 import { useSafeAreaContext } from '@tamer4lynx/tamer-screen'
-import { Icon, type IconSet } from '@tamer4lynx/tamer-icons'
+import type { IconSet } from '@tamer4lynx/tamer-icons'
+import '@tamer4lynx/tamer-icons'
 import type { ReactNode } from '@lynx-js/react'
 import type { ViewProps } from '@lynx-js/types'
 
@@ -24,8 +25,7 @@ export function useAppShellRouter(): AppShellRouterContextValue | null {
 }
 
 const DEFAULT_BAR_HEIGHT = 56
-export const px = (value: number) => `${Math.round(value)}px`
-
+export const px = (...values: number[]) => values.map(value => `${Math.round(value)}px`).join(' ')
 export interface AppShellContextValue {
   showAppBar: boolean
   showTabBar: boolean
@@ -72,7 +72,13 @@ function ActionButton({ action, color = '#fff' }: { action: AppBarAction; color?
       bindtouchend={() => setPressed(false)}
       bindtouchcancel={() => setPressed(false)}
     >
-      <Icon name={action.icon} set={action.set ?? 'material'} size={ACTION_ICON_SIZE} color={color} />
+      <icon
+        icon={action.icon}
+        set={action.set ?? 'material'}
+        size={ACTION_ICON_SIZE}
+        iconColor={color}
+        style={{ width: px(ACTION_ICON_SIZE), height: px(ACTION_ICON_SIZE) }}
+      />
       <view className="AppShellActionButton-ripple" />
     </view>
   )
@@ -186,7 +192,13 @@ function TabBarItem({
       bindtouchend={() => setPressed(false)}
       bindtouchcancel={() => setPressed(false)}
     >
-      <Icon name={item.icon} set={item.set ?? 'material'} size={24} color={iconC} />
+      <icon
+        icon={item.icon}
+        set={item.set ?? 'material'}
+        size={24}
+        iconColor={iconC}
+        style={{ width: px(24), height: px(24) }}
+      />
       {item.label ? (
         <text style={{ marginTop: px(4), color: iconC }}>{item.label}</text>
       ) : null}
