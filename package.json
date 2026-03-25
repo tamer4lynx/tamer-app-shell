@@ -1,7 +1,7 @@
 {
   "name": "@tamer4lynx/tamer-app-shell",
   "publishConfig": { "access": "public", "tag": "prerelease" },
-  "version": "0.0.3",
+  "version": "0.0.4",
   "type": "module",
   "description": "App chrome: AppBar, TabBar, and Content layout for Lynx.",
   "main": "dist/src/index.jsx",

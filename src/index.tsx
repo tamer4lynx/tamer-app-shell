@@ -135,6 +135,7 @@ export function AppBar({
         flexShrink: 0,
         borderBottomWidth: '1px',
         borderBottomColor: '#e0e0e0',
+        zIndex: 500,
         ...(style as object ?? {}),
       }}
       {...rest}
@@ -245,6 +246,7 @@ export function TabBar({ tabs, iconColor, style, ...rest }: TabBarProps) {
         justifyContent: 'space-around',
         borderTopWidth: '1px',
         borderTopColor: '#e0e0e0',
+        zIndex: 500,
         ...keyboard.visible ? { position: 'absolute', display: 'block', overflow: 'hidden', maxHeight: '0px', height: '0px', paddingBottom: '0px', paddingTop: '0px', bottom: '-50px' } : { display: 'flex', paddingBottom: px(insets.bottom), paddingTop: px(12) },
         ...(style as object ?? {}),
       }}
