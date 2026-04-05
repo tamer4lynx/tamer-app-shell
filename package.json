@@ -18,8 +18,7 @@
   ],
   "peerDependencies": {
     "@lynx-js/react": ">=0.100.0",
-    "react": "^17.0.0",
-    "react-router": "^6.0.0"
+    "react": "^17.0.0"
   },
   "scripts": {
     "build": "rm -rf dist && tsc && cp src/app-shell.css dist/src/app-shell.css"
@@ -27,12 +26,12 @@
   "dependencies": {
     "@tamer4lynx/tamer-icons": "^0.0.6",
     "@tamer4lynx/tamer-insets": "^0.0.4",
-    "@tamer4lynx/tamer-screen": "^0.0.4"
+    "@tamer4lynx/tamer-screen": "^0.0.4",
+    "@tamer4lynx/tamer-system-ui": "^0.0.3"
   },
   "devDependencies": {
     "@types/react": "^17.0.0",
     "react": "^17.0.2",
-    "react-router": "^6.28.0",
     "typescript": "~5.8.0"
   },
   "engines": {

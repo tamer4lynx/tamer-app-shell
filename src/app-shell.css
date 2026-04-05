@@ -1,55 +1,477 @@
-.AppShellActionButton {
+:root {
+  /* M3 baseline light scheme */
+  --m3-primary: #6750a4;
+  --m3-on-primary: #ffffff;
+  --m3-primary-container: #eaddff;
+  --m3-on-primary-container: #21005d;
+  --m3-secondary: #625b71;
+  --m3-on-secondary: #ffffff;
+  --m3-secondary-container: #e8def8;
+  --m3-on-secondary-container: #1d192b;
+  --m3-tertiary: #7d5260;
+  --m3-on-tertiary: #ffffff;
+  --m3-tertiary-container: #ffd8e4;
+  --m3-on-tertiary-container: #31111d;
+  --m3-error: #b3261e;
+  --m3-on-error: #ffffff;
+  --m3-error-container: #f9dedc;
+  --m3-on-error-container: #410e0b;
+  --m3-surface: #fef7ff;
+  --m3-on-surface: #1d1b20;
+  --m3-on-surface-variant: #49454f;
+  --m3-surface-container-lowest: #ffffff;
+  --m3-surface-container-low: #f7f2fa;
+  --m3-surface-container: #f3edf7;
+  --m3-surface-container-high: #ece6f0;
+  --m3-surface-container-highest: #e6e0e9;
+  --m3-outline: #79747e;
+  --m3-outline-variant: #cac4d0;
+  --m3-inverse-surface: #322f35;
+  --m3-inverse-on-surface: #f5eff7;
+  --m3-inverse-primary: #d0bcff;
+  --m3-shadow: #000000;
+  --m3-scrim: #000000;
+  /* FAB aliases */
+  --m3-fab-container: var(--m3-primary-container, #eaddff);
+  --m3-on-fab: var(--m3-on-primary-container, #21005d);
+  /* Elevation shadows */
+  --m3-elevation-1: 0px 1px 2px 0px rgba(0,0,0,0.30), 0px 1px 3px 1px rgba(0,0,0,0.15);
+  --m3-elevation-2: 0px 1px 2px 0px rgba(0,0,0,0.30), 0px 2px 6px 2px rgba(0,0,0,0.15);
+  --m3-elevation-3: 0px 1px 3px 0px rgba(0,0,0,0.30), 0px 4px 8px 3px rgba(0,0,0,0.15);
+  --m3-state-primary: rgba(103, 80, 164, 0.12);
+  --m3-state-on-dark: rgba(255, 255, 255, 0.12);
+}
+
+.M3IconButton {
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  border-radius: 50%;
   transition: transform 0.12s ease-out, opacity 0.12s ease-out;
 }
 
-.AppShellActionButton--pressed {
+.M3IconButton--pressed {
   transform: scale(0.92);
-  opacity: 0.85;
+  opacity: 0.88;
 }
 
-.AppShellActionButton-ripple {
+.M3IconButton-stateLayer {
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(103, 80, 164, 0.12);
   transform: scale(0);
   opacity: 0;
-  transform-origin: center;
-  overflow: hidden;
+  pointer-events: none;
 }
 
-.AppShellActionButton--pressed .AppShellActionButton-ripple {
-  animation: AppShellRipple 0.3s ease-out forwards;
+.M3IconButton--pressed .M3IconButton-stateLayer {
+  animation: M3StateLayerPulse 0.35s ease-out forwards;
 }
 
-@keyframes AppShellRipple {
+@keyframes M3StateLayerPulse {
   0% {
     transform: scale(0);
-    opacity: 0.8;
+    opacity: 0.4;
   }
   100% {
-    transform: scale(2.5);
+    transform: scale(2);
     opacity: 0;
   }
 }
 
-.AppShellTabItem {
+.M3NavBar {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-around;
+  min-height: 80px;
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: var(--m3-outline-variant, #cac4d0);
+  background: var(--m3-surface-container, #f3edf7);
 }
 
+.M3NavBarItem {
+  position: relative;
+  flex: 1 1 0%;
+  transition: transform 0.12s ease-out, opacity 0.12s ease-out;
+}
+
+.M3NavBarItem--pressed {
+  transform: scale(0.98);
+  opacity: 0.96;
+}
+
+.M3NavBarItem--column.M3NavBarItem--pressed {
+  transform: scale(0.97);
+}
+
+.M3NavBarItem--row.M3NavBarItem--pressed {
+  transform: scale(0.98);
+}
+
+.M3NavBarItem-columnPillTrack {
+  min-width: 64px;
+  transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.M3NavBarItem-label {
+  width: 64px;
+  text-align: center;
+}
+
+.M3NavBarItem-rowPill {
+  background-color: var(--m3-secondary-container, #e8def8);
+  transition: transform 0.28s cubic-bezier(0.2, 0, 0, 1);
+  transform: scaleX(1);
+  transform-origin: center;
+}
+
+.M3NavBarItem-rowPill.M3NavBarItem-rowPill--hidden {
+  transform: scaleX(0);
+}
+
+.M3Drawer-panel {
+  transition: transform 0.22s cubic-bezier(0.2, 0, 0, 1);
+  box-shadow: var(--m3-elevation-1);
+}
+
+.M3Drawer-scrim {
+  transition: background-color 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.M3Tabs-tab {
+  transition: opacity 0.15s ease-out;
+}
+
+.AppShellActionButton,
+.AppShellTabItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.AppShellActionButton--pressed,
 .AppShellTabItem--pressed {
   transform: scale(0.94);
   opacity: 0.9;
+}
+
+.M3Fab {
+  transition: transform 0.12s ease-out, opacity 0.12s ease-out;
+}
+
+.M3Fab-fill {
+  background-color: var(--m3-fab-container, #ece6f0);
+}
+
+.M3Fab--pressed {
+  transform: scale(0.94);
+  opacity: 0.92;
+}
+
+.M3ExtendedFab {
+  transition: transform 0.12s ease-out, opacity 0.12s ease-out;
+}
+
+.M3ExtendedFab--pressed {
+  transform: scale(0.96);
+  opacity: 0.92;
+}
+
+.M3FabMenu-actionPill {
+  transition: transform 0.12s ease-out, opacity 0.12s ease-out;
+}
+
+.M3FabMenu-actionPill--pressed {
+  transform: scale(0.96);
+  opacity: 0.92;
+}
+
+.M3FabMenu-row {
+  transition:
+    opacity 0.2s ease-out,
+    max-height 0.2s ease-out;
+}
+
+.M3FabMenu-scrim {
+  transition: background-color 0.2s ease-out;
+}
+
+/* ── M3 Buttons ── */
+
+.M3Button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+  position: relative;
+  white-space: nowrap;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, border-radius 0.12s ease-out, background-color 0.12s ease-out;
+}
+
+.M3Button--pressed {
+  transform: scale(0.985);
+}
+
+.M3Button--disabled {
+  box-shadow: none;
+}
+
+.M3Button-stateLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.M3Button--pressed .M3Button-stateLayer {
+  animation: M3StateLayerPulse 0.35s ease-out forwards;
+}
+
+.M3Button-label {
+  white-space: nowrap;
+  text-align: center;
+  text-overflow: ellipsis;
+}
+
+.M3Button-leadingIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── M3 Button Group ── */
+
+.M3ButtonGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.M3SegmentedButton {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: transform 0.12s ease-out, opacity 0.12s ease-out;
+}
+
+.M3SegmentedButton--pressed {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
+.M3SegmentedButton-label {
+  white-space: nowrap;
+  text-align: center;
+}
+
+.M3SegmentedButton-stateLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.M3SegmentedButton--pressed .M3SegmentedButton-stateLayer {
+  animation: M3StateLayerPulse 0.35s ease-out forwards;
+}
+
+/* ── M3 Navigation Drawer ── */
+
+.M3NavDrawer {
+  display: flex;
+  flex-direction: column;
+}
+
+.M3NavDrawer-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  transition: transform 0.12s ease-out, opacity 0.12s ease-out;
+}
+
+.M3NavDrawer-item--pressed {
+  transform: scale(0.98);
+  opacity: 0.88;
+}
+
+.M3NavDrawer-indicator {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 28px;
+}
+
+/* ── M3 Navigation Rail ── */
+
+.M3NavRail {
+  display: flex;
+  flex-direction: column;
+}
+
+.M3NavRail--collapsed {
+  align-items: center;
+}
+
+.M3NavRail--expanded {
+  align-items: stretch;
+}
+
+.M3NavRail-item {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  transition: transform 0.12s ease-out, opacity 0.12s ease-out;
+}
+
+.M3NavRail-item--pressed {
+  transform: scale(0.94);
+  opacity: 0.92;
+}
+
+.M3NavRail-item--collapsed {
+  flex-direction: column;
+  align-items: center;
+}
+
+.M3NavRail-item--expanded {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.M3NavRail-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 32px;
+  border-radius: 16px;
+  transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.M3NavRail-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.M3NavRail-iconStack {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.M3NavRail-badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.M3NavRail-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.M3NavRail-label {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.M3Fab,
+.M3ExtendedFab,
+.M3FabMenu-actionPill,
+.M3FabMenu-trigger {
+  position: relative;
+  overflow: hidden;
+}
+
+.M3FabMenu-trigger {
+  transition:
+    transform 0.12s ease-out,
+    opacity 0.12s ease-out,
+    border-radius 0.2s ease-out;
+}
+
+/* ── M3 Cards ── */
+
+.M3ElevatedSurface {
+  border-width: 0.5px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.2);
+  /* Tight shadow, same black channel as border so edge + lift read as one */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), 0 0.5px 1px rgba(0, 0, 0, 0.12);
+}
+
+.M3Card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.12s ease-out, opacity 0.12s ease-out, box-shadow 0.12s ease-out;
+}
+
+.M3Card--pressed {
+  transform: scale(0.99);
+}
+
+.M3Card--disabled {
+  opacity: 0.38;
+  box-shadow: none;
+}
+
+.M3Card-stateLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--m3-state-primary);
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.M3Card--pressed .M3Card-stateLayer {
+  animation: M3StateLayerPulse 0.35s ease-out forwards;
 }
