@@ -231,6 +231,9 @@ export function Button({
         } : {}),
         ...(style as object ?? {}),
       }}
+      flatten={false}
+      native-interaction-enabled={true}
+      user-interaction-enabled={true}
       bindtap={disabled ? undefined : onTap}
       bindtouchstart={() => !disabled && setPressed(true)}
       bindtouchend={() => setPressed(false)}
@@ -260,4 +263,9 @@ export function Button({
       }} />
     </view>
   )
+}
+
+// Ensures Lynx registers the component snapshot for Button when this module loads.
+export function __ButtonSnapshotSeed() {
+  return <Button label="seed" />
 }

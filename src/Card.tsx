@@ -80,3 +80,12 @@ export function Card({
     </view>
   )
 }
+
+// Ensures Lynx registers the component snapshot for Card when this module loads.
+export function __CardSnapshotSeed() {
+  return (
+    <Card variant="filled">
+      <text>seed</text>
+    </Card>
+  )
+}

@@ -122,7 +122,11 @@
 
 .M3NavBarItem-label {
   width: 64px;
+  max-width: 64px;
   text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .M3NavBarItem-rowPill {
@@ -184,6 +188,31 @@
   opacity: 0.92;
 }
 
+/* Speed-dial: rise from below + stagger (also nudges compositing on open). */
+@keyframes M3FabMenuPillLift {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.M3FabMenu-pillLift {
+  animation: M3FabMenuPillLift 0.16s cubic-bezier(0.25, 0.85, 0.2, 1) backwards;
+}
+
+@keyframes M3FabMenuScrimIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .M3FabMenu-actionPill {
   transition: transform 0.12s ease-out, opacity 0.12s ease-out;
 }
@@ -200,7 +229,18 @@
 }
 
 .M3FabMenu-scrim {
+  animation: M3FabMenuScrimIn 0.12s ease-out;
   transition: background-color 0.2s ease-out;
+  pointer-events: auto;
+}
+
+/* Fullscreen host passes touches through; scrim and FabMenu column set auto. */
+.FloatingFabMenuHost {
+  pointer-events: none;
+}
+
+.M3FabMenu-hitTarget {
+  pointer-events: auto;
 }
 
 /* ── M3 Buttons ── */

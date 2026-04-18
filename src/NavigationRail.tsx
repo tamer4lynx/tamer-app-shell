@@ -21,11 +21,13 @@ export interface NavRailItem {
   value: string
   badge?: string
   dot?: boolean
+  onTap?: () => void
 }
 
 export interface NavigationRailProps extends ViewProps {
   items: NavRailItem[]
   selected?: string
+  /** Used only when an item has no `onTap` (legacy). Prefer `onTap` on each item. */
   onSelect?: (value: string) => void
   /** Optional FAB or menu button rendered at the top */
   top?: ReactNode
@@ -122,7 +124,13 @@ export function NavigationRail({
               isActive={isActive}
               expanded={expanded}
               colors={colors}
-              onTap={() => onSelect?.(item.value)}
+              onTap={() => {
+                if (item.onTap) {
+                  item.onTap()
+                  return
+                }
+                onSelect?.(item.value)
+              }}
             />
           )
         })}

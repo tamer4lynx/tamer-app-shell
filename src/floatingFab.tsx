@@ -60,9 +60,43 @@ export function FloatingFabContainer({ children, style, ...rest }: FloatingFabCo
     <view
       className="FloatingFabContainer"
       style={{
-        position: 'fixed',
+        // Keep floating chrome inside the current screen's stacking context so pushed
+        // nav-screens animate their own FABs instead of anchoring to the global viewport.
+        position: 'absolute',
         right: px(rightMargin),
         bottom: px(fabBottomMargin),
+        zIndex: 10000,
+        overflow: 'visible',
+        ...(style as object ?? {}),
+      }}
+      {...rest}
+    >
+      {children}
+    </view>
+  )
+}
+
+export interface FloatingFabMenuHostProps extends ViewProps {
+  children?: ReactNode
+}
+
+/**
+ * Full-screen layer (fills the current positioned ancestor, usually the screen) for the dimmed
+ * scrim. {@link FabMenu} pins its trigger and action column with `position: fixed` + {@link useFloatingFabOffsets}.
+ */
+export function FloatingFabMenuHost({ children, style, ...rest }: FloatingFabMenuHostProps) {
+  return (
+    <view
+      flatten={false}
+      overlap
+      className="FloatingFabMenuHost"
+      style={{
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        right: '0px',
+        bottom: '0px',
+        overflow: 'visible',
         zIndex: 10000,
         ...(style as object ?? {}),
       }}

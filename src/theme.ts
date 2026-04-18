@@ -40,6 +40,12 @@ const M3_SURFACE_CONTAINER_HIGH_DARK = '#2b2930'
 const M3_SURFACE_CONTAINER_HIGHEST_LIGHT = '#e6e0e9'
 const M3_SURFACE_CONTAINER_HIGHEST_DARK = '#36343b'
 
+/** Match `resolveLayoutTheme` fallbacks in tamer-router `layoutTheme.ts` — hex so Lynx applies `backgroundColor` on `<view>`. */
+const M3_SECONDARY_CONTAINER_LIGHT = '#cce8e5'
+const M3_ON_SECONDARY_CONTAINER_LIGHT = '#005f5a'
+const M3_SECONDARY_CONTAINER_DARK = '#1a3538'
+const M3_ON_SECONDARY_CONTAINER_DARK = '#80cbc4'
+
 function isDarkFromHex(hex: string): boolean {
   const m = /^#?([0-9a-fA-F]{6})$/.exec(hex.trim())
   if (!m) return false
@@ -63,13 +69,15 @@ export function useM3ThemeTokens(): M3ThemeTokens {
   const onSurface = theme?.onSurface ?? 'var(--m3-on-surface, #1d1b20)'
   const surfaceContainerResolved =
     theme?.surfaceContainer ?? (isDark ? M3_SURFACE_CONTAINER_DARK : M3_SURFACE_CONTAINER_LIGHT)
+  const defaultSecondaryContainer = isDark ? M3_SECONDARY_CONTAINER_DARK : M3_SECONDARY_CONTAINER_LIGHT
+  const defaultOnSecondaryContainer = isDark ? M3_ON_SECONDARY_CONTAINER_DARK : M3_ON_SECONDARY_CONTAINER_LIGHT
   return {
     primary: theme?.primary ?? 'var(--m3-primary, #6750a4)',
     onPrimary: theme?.onPrimary ?? 'var(--m3-on-primary, #ffffff)',
     primaryContainer: theme?.primaryContainer ?? theme?.primaryDark ?? defaultPrimaryContainer,
     onPrimaryContainer: theme?.onPrimaryContainer ?? defaultOnPrimaryContainer,
-    secondaryContainer: theme?.secondaryContainer ?? 'var(--m3-secondary-container, #e8def8)',
-    onSecondaryContainer: theme?.onSecondaryContainer ?? 'var(--m3-on-secondary-container, #1d192b)',
+    secondaryContainer: theme?.secondaryContainer ?? defaultSecondaryContainer,
+    onSecondaryContainer: theme?.onSecondaryContainer ?? defaultOnSecondaryContainer,
     surface,
     surfaceContainer: surfaceContainerResolved,
     surfaceContainerLow:

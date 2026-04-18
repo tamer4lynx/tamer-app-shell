@@ -4,7 +4,7 @@ import '@tamer4lynx/tamer-icons'
 import type { IconSet } from '@tamer4lynx/tamer-icons'
 import type { ViewProps } from '@lynx-js/types'
 import { px } from './index.js'
-import { FloatingFabContainer, useFloatingFabOffsets } from './floatingFab.js'
+import { useFloatingFabOffsets } from './floatingFab.js'
 import { useM3ThemeTokens } from './theme.js'
 
 /**
@@ -26,6 +26,9 @@ export interface FabProps extends ViewProps {
     icon?: string
   }
 }
+
+/** FAB surfaces sit above typical page content (e.g. nav overlays). */
+const FAB_Z = 10000
 
 const FAB_DIMS: Record<FabSize, { size: number; icon: number; radius: number }> = {
   small:   { size: 40, icon: 24, radius: 12 },
@@ -60,6 +63,7 @@ export function Fab({
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
+        // zIndex: FAB_Z,
         ...(style as object ?? {}),
       }}
       bindtap={onTap}
@@ -136,6 +140,7 @@ export function ExtendedFab({
         flexGrow: 0,
         flexShrink: 0,
         overflow: 'hidden',
+        // zIndex: FAB_Z,
         ...(style as object ?? {}),
       }}
       bindtap={onTap}
@@ -180,8 +185,6 @@ export interface FabMenuItem {
 export interface FabMenuProps extends ViewProps {
   icon: string
   iconSet?: IconSet
-  /** When true, pins the FAB to the bottom-end of the screen with safe-area insets; menu stack sits above it. */
-  floating?: boolean
   items: FabMenuItem[]
   colors?: {
     fabContainer?: string
@@ -198,17 +201,15 @@ const MENU_ITEM_HEIGHT = 56
 const MENU_ITEM_RADIUS = MENU_ITEM_HEIGHT / 2
 const MENU_ITEM_ICON = 24
 const FAB_MENU_TRIGGER_SIZE = 56
-const FAB_MENU_EDGE = 16
 const FAB_MENU_STACK_GAP = 8
 
-/** Scrim + menu must beat page chrome; menu rows use `position: fixed` and may stack vs. scrim in viewport space (not inside the FAB container), so keep menu z-index above {@link FAB_MENU_SCRIM_Z}. */
-const FAB_MENU_SCRIM_Z = 9999
-const FAB_MENU_STACK_Z = 10050
+/** Scrim, then speed-dial rows, then trigger; all within the FAB layer (each ≥ FAB_Z). */
+const FAB_MENU_SCRIM_Z = FAB_Z
+const FAB_MENU_TRIGGER_Z = FAB_Z + 20
 
 export function FabMenu({
   icon,
   iconSet = 'material',
-  floating = false,
   items,
   colors,
   style,
@@ -216,7 +217,7 @@ export function FabMenu({
 }: FabMenuProps) {
   const [open, setOpen] = useState(false)
   const [fabPressed, setFabPressed] = useState(false)
-  const floatingOffsets = useFloatingFabOffsets()
+  const fabOff = useFloatingFabOffsets()
   const theme = useM3ThemeTokens()
   const fabBg = colors?.fabContainer ?? theme.primaryContainer
   const fabFg = colors?.fabIcon ?? theme.onPrimaryContainer
@@ -225,101 +226,97 @@ export function FabMenu({
   const itemIcon = colors?.itemIcon ?? theme.onSecondaryContainer
   const scrimColor = colors?.scrim ?? 'rgba(0,0,0,0.32)'
 
-  const menuStackBottomPx = floating ? floatingOffsets.menuStackBottomPx : 80
-  const menuRightPx = floating ? floatingOffsets.rightMargin : FAB_MENU_EDGE
-
-  const shell = (
-    <view style={{ position: 'relative', zIndex: 1, overflow: 'visible' }}>
-      {open ? (
-        <view style={{
-          position: 'fixed',
-          right: px(menuRightPx),
-          bottom: px(menuStackBottomPx),
-          display: 'flex',
-          flexDirection: 'column',
-          gap: px(8),
-          alignItems: 'flex-end',
-          zIndex: FAB_MENU_STACK_Z,
-        }}>
-          {items.map((item, i) => (
-            <FabMenuRow
-              key={i}
-              itemIndex={i}
-              item={item}
-              bg={itemBg}
-              fg={itemFg}
-              iconColor={itemIcon}
-              onTap={() => { item.onTap(); setOpen(false) }}
-            />
-          ))}
-        </view>
-      ) : null}
-
-      <view
-        data-testid="fab-menu-trigger"
-        className={`M3FabMenu-trigger M3ElevatedSurface${fabPressed ? ' M3Fab--pressed' : ''}`}
-        style={{
-          width: px(FAB_MENU_TRIGGER_SIZE),
-          height: px(FAB_MENU_TRIGGER_SIZE),
-          borderRadius: open ? px(FAB_MENU_TRIGGER_SIZE / 2) : px(16),
-          backgroundColor: fabBg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        bindtap={() => setOpen(!open)}
-        bindtouchstart={() => setFabPressed(true)}
-        bindtouchend={() => setFabPressed(false)}
-        bindtouchcancel={() => setFabPressed(false)}
-      >
-        <icon
-          icon={open ? 'close' : icon}
-          set={iconSet}
-          size={24}
-          iconColor={fabFg}
-          style={{ width: px(24), height: px(24) }}
-        />
-      </view>
+  const trigger = (
+    <view
+      data-testid="fab-menu-trigger"
+      className={`M3FabMenu-trigger M3ElevatedSurface${fabPressed ? ' M3Fab--pressed' : ''}`}
+      style={{
+        width: px(FAB_MENU_TRIGGER_SIZE),
+        height: px(FAB_MENU_TRIGGER_SIZE),
+        borderRadius: open ? px(FAB_MENU_TRIGGER_SIZE / 2) : px(16),
+        backgroundColor: fabBg,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+      bindtap={() => setOpen(!open)}
+      bindtouchstart={() => setFabPressed(true)}
+      bindtouchend={() => setFabPressed(false)}
+      bindtouchcancel={() => setFabPressed(false)}
+    >
+      <icon
+        icon={open ? 'close' : icon}
+        set={iconSet}
+        size={24}
+        iconColor={fabFg}
+        style={{ width: px(24), height: px(24) }}
+      />
     </view>
   )
 
+  const scrim = open ? (
+    <view
+      flatten={false}
+      overlap
+      className="M3FabMenu-scrim"
+      style={{
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        right: '0px',
+        bottom: '0px',
+        backgroundColor: scrimColor,
+        zIndex: FAB_MENU_SCRIM_Z,
+      }}
+      bindtap={() => setOpen(false)}
+    />
+  ) : null
+
   return (
     <>
-      {open ? (
-        <view
-          className="M3FabMenu-scrim"
-          style={{
-            position: 'fixed',
-            left: '0px',
-            top: '0px',
-            right: '0px',
-            bottom: '0px',
-            backgroundColor: scrimColor,
-            zIndex: FAB_MENU_SCRIM_Z,
-          }}
-          bindtap={() => setOpen(false)}
-        />
-      ) : null}
-      {floating ? (
-        <FloatingFabContainer style={{ minWidth: px(FAB_MENU_TRIGGER_SIZE), minHeight: px(FAB_MENU_TRIGGER_SIZE), ...(style as object ?? {}) }} {...rest}>
-          {shell}
-        </FloatingFabContainer>
-      ) : (
-        <view
-          style={{
-            position: 'relative',
-            flexShrink: 0,
-            alignSelf: 'flex-end',
-            zIndex: 1,
-            minWidth: px(FAB_MENU_TRIGGER_SIZE),
-            minHeight: px(FAB_MENU_TRIGGER_SIZE),
-            ...(style as object ?? {}),
-          }}
-          {...rest}
-        >
-          {shell}
-        </view>
-      )}
+      {scrim}
+      <view
+        flatten={false}
+        overlap
+        className="M3FabMenu-hitTarget"
+        style={{
+          position: 'absolute',
+          right: px(fabOff.rightMargin),
+          bottom: px(fabOff.fabBottomMargin),
+          zIndex: FAB_MENU_TRIGGER_Z,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          alignItems: 'flex-end',
+          gap: px(FAB_MENU_STACK_GAP),
+          minWidth: px(FAB_MENU_TRIGGER_SIZE),
+          overflow: 'visible',
+          ...(style as object ?? {}),
+        }}
+        {...rest}
+      >
+        {open
+          ? items.map((item, i) => (
+              <view
+                key={i}
+                className="M3FabMenu-pillLift"
+                style={{
+                  animationDelay: `${(items.length - 1 - i) * 28}ms`,
+                }}
+              >
+                <FabMenuRow
+                  itemIndex={i}
+                  item={item}
+                  bg={itemBg}
+                  fg={itemFg}
+                  iconColor={itemIcon}
+                  onTap={() => { item.onTap(); setOpen(false) }}
+                />
+              </view>
+            ))
+          : null}
+        {trigger}
+      </view>
     </>
   )
 }
@@ -342,6 +339,7 @@ function FabMenuRow({
   const [pressed, setPressed] = useState(false)
   return (
     <view
+      flatten={false}
       data-testid={`fab-menu-item-${itemIndex}`}
       className={`M3FabMenu-actionPill${pressed ? ' M3FabMenu-actionPill--pressed' : ''}`}
       style={{

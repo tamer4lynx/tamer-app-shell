@@ -1,6 +1,6 @@
 /// <reference types="@lynx-js/react" />
 import './app-shell.css'
-import { createContext, useCallback, useContext, useState } from '@lynx-js/react'
+import { createContext, useContext, useState } from '@lynx-js/react'
 import { useInsets, useKeyboard } from '@tamer4lynx/tamer-insets'
 import { useSafeAreaContext } from '@tamer4lynx/tamer-screen'
 import type { IconSet } from '@tamer4lynx/tamer-icons'
@@ -16,7 +16,7 @@ export { Screen, SafeArea, useSafeAreaContext } from '@tamer4lynx/tamer-screen'
 export interface AppShellRouterContextValue {
   back: () => void
   canGoBack: () => boolean
-  replace: (route: string, options?: { mode?: string; direction?: string; tab?: boolean }) => void
+  replace: (route: string, options?: { mode?: string; direction?: string; tab?: boolean; layoutInstanceKey?: string }) => void
 }
 
 export const AppShellRouterContext = createContext<AppShellRouterContextValue | null>(null)
@@ -114,6 +114,39 @@ export function AppBar({
 
   const effectiveBarHeight = isSafeAreaChild ? DEFAULT_BAR_HEIGHT + insets.top : barHeight
   const hasLeft = left != null
+
+  let centerSlot: ReactNode
+  if (children != null) {
+    centerSlot = children
+  } else if (title) {
+    centerSlot = (
+      <view
+        style={{
+          flex: 1,
+          minWidth: 0,
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <text
+          style={{
+            fontWeight: '400',
+            fontSize: px(22),
+            lineHeight: px(28),
+            textAlign: 'center',
+            color: resolvedTitleColor,
+          }}
+        >
+          {title}
+        </text>
+      </view>
+    )
+  } else {
+    centerSlot = <view style={{ flex: 1 }} />
+  }
+
   return (
     <view
       style={{
@@ -135,7 +168,7 @@ export function AppBar({
       <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: px(ACTION_SIZE) }}>
         {left}
       </view>
-      {children ?? (title ? <text style={{ display: 'block', width: '100%', fontWeight: '400', fontSize: px(22), lineHeight: px(28), textAlign: 'center', color: resolvedTitleColor }}>{title}</text> : <view style={{ flex: 1 }} />)}
+      {centerSlot}
       <view style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: px(ACTION_SIZE), justifyContent: 'flex-end' }}>
         {right}
       </view>
@@ -147,7 +180,8 @@ export interface TabItem {
   icon: string
   set?: IconSet
   label?: string
-  path?: string
+  /** Controlled by the host (e.g. tamer-router): whether this tab appears selected */
+  active?: boolean
   onTap?: () => void
 }
 
@@ -165,18 +199,17 @@ export interface ThemeColors {
 
 export interface TabBarProps extends ViewProps {
   tabs: TabItem[]
-  currentPath?: string
   iconColor?: TabBarIconColor
   tabBarChromeHex?: string
   themeColors?: ThemeColors | null
 }
 
 const DEFAULT_ICON_COLOR: TabBarIconColor = {
-  active: 'var(--m3-on-secondary-container, #1d192b)',
-  inactive: 'var(--m3-on-surface-variant, #49454f)',
-  labelActive: 'var(--m3-on-surface, #1d1b20)',
-  labelInactive: 'var(--m3-on-surface-variant, #49454f)',
   pill: 'var(--m3-secondary-container, #e8def8)',
+  active: 'var(--m3-primary, #6750a4)',
+  inactive: 'var(--m3-on-surface-variant, #49454f)',
+  labelActive: 'var(--m3-primary, #6750a4)',
+  labelInactive: 'var(--m3-on-surface-variant, #49454f)',
 }
 
 /** M3 Navigation Bar dimensions */
@@ -201,10 +234,10 @@ function TabBarItem({
   const theme = useM3ThemeTokens()
   const [pressed, setPressed] = useState(false)
   const iconC = isActive
-    ? (iconColor.active ?? theme.onSecondaryContainer)
+    ? (iconColor.active ?? theme.primary)
     : (iconColor.inactive ?? theme.onSurfaceVariant)
   const labelC = isActive
-    ? ((iconColor as any).labelActive ?? theme.onSurface)
+    ? ((iconColor as any).labelActive ?? theme.primary)
     : ((iconColor as any).labelInactive ?? theme.onSurfaceVariant)
   const pillBg = isActive ? ((iconColor as any).pill ?? theme.secondaryContainer) : 'transparent'
   return (
@@ -253,73 +286,87 @@ function TabBarItem({
           fontWeight: '500',
           lineHeight: px(16),
           textAlign: 'center',
+          whiteSpace: 'nowrap',
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
         }}>{item.label}</text>
       ) : null}
     </view>
   )
 }
 
-export function TabBar({ tabs, currentPath, iconColor, style, ...rest }: TabBarProps) {
+export function TabBar({ tabs, iconColor, style, ...rest }: TabBarProps) {
   const insets = useInsets()
   const keyboard = useKeyboard()
   const safeArea = useSafeAreaContext()
   const isSafeAreaChild = safeArea?.hasBottom ?? false
-  const router = useAppShellRouter()
-  const replace = router?.replace ?? (() => {})
-
-  const handleTap = useCallback(
-    (item: TabItem) => {
-      'background only'
-      if (!item.path) {
-        item.onTap?.()
-        return
-      }
-      const pathname = currentPath || '/'
-      const isCurrent = (t: TabItem) => {
-        const p = t.path || '/'
-        if (p === '/') return pathname === '/' || pathname === ''
-        return pathname === p || pathname.startsWith(p + '/')
-      }
-      if (isCurrent(item)) return
-      replace(item.path, { tab: true })
-    },
-    [currentPath, replace, tabs]
-  )
 
   return (
     <view
       className="M3NavBar"
       style={{
         ...(isSafeAreaChild ? { marginBottom: `-${Math.round(insets.bottom)}px` } : {}),
-        zIndex: 500,
-        ...keyboard.visible ? { position: 'absolute', display: 'block', overflow: 'hidden', maxHeight: '0px', height: '0px', paddingBottom: '0px', paddingTop: '0px', bottom: '-50px' } : { display: 'flex', paddingBottom: px(insets.bottom) },
+        ...keyboard.visible
+          ? {
+              position: 'absolute',
+              display: 'block',
+              overflow: 'hidden',
+              maxHeight: '0px',
+              height: '0px',
+              paddingBottom: '0px',
+              paddingTop: '0px',
+              bottom: '-50px',
+              zIndex: 500,
+            }
+          : { display: 'flex', flexShrink: 0, paddingBottom: px(insets.bottom) },
         ...(style as object ?? {}),
       }}
       {...rest}
     >
-      {tabs.map((item, i) => {
-        const pathname = currentPath || '/'
-        const p = item.path || '/'
-        const isActive = item.path
-          ? p === '/' ? pathname === '/' || pathname === '' : pathname === p || pathname.startsWith(p + '/')
-          : false
-        return (
-          <TabBarItem
-            key={i}
-            item={item}
-            isActive={isActive}
-            onTap={() => handleTap(item)}
-            iconColor={iconColor}
-          />
-        )
-      })}
+      {tabs.map((item, i) => (
+        <TabBarItem
+          key={i}
+          item={item}
+          isActive={item.active === true}
+          onTap={() => item.onTap?.()}
+          iconColor={iconColor}
+        />
+      ))}
     </view>
   )
 }
 
-export interface ContentProps extends ViewProps {}
+export interface ContentProps extends ViewProps {
+  /**
+   * When `true` (default), wraps children in a vertical `scroll-view`.
+   * When `false`, children fill the flex column (use when the screen provides its own `scroll-view`).
+   */
+  scrollable?: boolean
+}
 
-export function Content({ children, style, ...rest }: ContentProps) {
+const CONTENT_FILL_STYLE = {
+  flex: 1,
+  minHeight: 0,
+  display: 'flex' as const,
+  flexDirection: 'column' as const,
+  flexGrow: 1,
+  flexShrink: 1,
+  flexBasis: '0px',
+}
+
+export function Content({ children, style, scrollable = true, ...rest }: ContentProps) {
+  if (!scrollable) {
+    return (
+      <view
+        style={{ ...CONTENT_FILL_STYLE, ...(style as object ?? {}) }}
+        native-interaction-enabled={true}
+        {...rest}
+      >
+        {children}
+      </view>
+    )
+  }
+
   const scrollStyle: ViewProps['style'] = {
     display: 'flex',
     flex: '1 1 100%',
@@ -331,10 +378,49 @@ export function Content({ children, style, ...rest }: ContentProps) {
     ...(style as object ?? {}),
   }
   return (
-    <view style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-      <scroll-view scroll-y style={scrollStyle} {...rest}>
+    <view
+      style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}
+      native-interaction-enabled={true}
+    >
+      <scroll-view
+        scroll-y
+        style={scrollStyle}
+        native-interaction-enabled={true}
+        user-interaction-enabled={true}
+        {...rest}
+      >
         {children}
       </scroll-view>
+    </view>
+  )
+}
+
+export interface TabShellProps extends ViewProps {
+  /** Renders below the main area (typically `<TabBar />`). */
+  tabBar: ReactNode
+}
+
+/**
+ * Column between AppBar (or top chrome) and the bottom of `SafeArea`: main area fills
+ * remaining height; `tabBar` stays in layout flow at the bottom (no overlap with `zIndex`).
+ */
+export function TabShell({ children, tabBar, style, ...rest }: TabShellProps) {
+  return (
+    <view
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        minHeight: '0px',
+        flexGrow: 1,
+        flexShrink: 1,
+        flexBasis: '0px',
+        ...(style as object ?? {}),
+      }}
+      {...rest}
+    >
+      {children}
+      {tabBar}
     </view>
   )
 }
@@ -369,10 +455,28 @@ export { NavigationRail } from './NavigationRail.js'
 export type { NavigationRailProps, NavRailItem } from './NavigationRail.js'
 export { Card } from './Card.js'
 export type { CardProps, CardVariant } from './Card.js'
+
+// Ensures Lynx registers snapshots for app-shell components that often render
+// inside overlay/main-thread paths before the user navigates to them.
+export function __AppShellSnapshotSeed() {
+  return (
+    <>
+      <AppBar title="seed" />
+      <TabBar
+        tabs={[{ icon: 'home', label: 'Home', active: true, onTap: () => {} }]}
+      />
+    </>
+  )
+}
 export {
   FAB_FLOAT_EDGE,
   FloatingFabContainer,
+  FloatingFabMenuHost,
   TAB_BAR_VISUAL_HEIGHT,
   useFloatingFabOffsets,
 } from './floatingFab.js'
-export type { FloatingFabContainerProps, FloatingFabOffsets } from './floatingFab.js'
+export type {
+  FloatingFabContainerProps,
+  FloatingFabMenuHostProps,
+  FloatingFabOffsets,
+} from './floatingFab.js'
