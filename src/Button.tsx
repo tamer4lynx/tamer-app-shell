@@ -131,7 +131,7 @@ function resolveButtonColors(
       case 'filled':
         return {
           bg: cBg ?? theme.primary,
-          fg: cFg ?? theme.onPrimary,
+          fg: cFg ?? (variant === 'filled' ? theme.surface : theme.onPrimary),
           ...(variant === 'filled' ? { boxShadow: ELEVATION_2 } : {}),
         }
       case 'tonal':
@@ -150,7 +150,7 @@ function resolveButtonColors(
   }
   switch (variant) {
     case 'filled':
-      return { bg: cBg ?? theme.primary, fg: cFg ?? theme.onPrimary, boxShadow: ELEVATION_2 }
+      return { bg: cBg ?? theme.primary, fg: cFg ?? theme.surface, boxShadow: ELEVATION_2 }
     case 'tonal':
       return {
         bg: cBg ?? theme.secondaryContainer,
