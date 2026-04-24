@@ -9,6 +9,7 @@ import { useAppShellContext } from './appShellContext.js'
  * @see https://m3.material.io/components/floating-action-button/specs
  */
 export const FAB_FLOAT_EDGE = 16
+export const FAB_FLOAT_Z = 10000
 
 /**
  * Matches `.M3NavBar { min-height: 80px }` — used when tab bar is visible so the FAB sits above it with FAB_FLOAT_EDGE gap.
@@ -31,7 +32,7 @@ export interface FloatingFabOffsets {
 }
 
 /**
- * Computes fixed positioning for a floating FAB: `FAB_FLOAT_EDGE` from the right,
+ * Computes screen-pinned positioning for a floating FAB: `FAB_FLOAT_EDGE` from the right,
  * and from the bottom: `FAB_FLOAT_EDGE` + safe-area inset, plus `TAB_BAR_VISUAL_HEIGHT` when `showTabBar` is true.
  */
 export function useFloatingFabOffsets(): FloatingFabOffsets {
@@ -50,7 +51,7 @@ export interface FloatingFabContainerProps extends ViewProps {
 }
 
 /**
- * Pins children to the bottom-end of the screen with M3 spacing: 16dp from the trailing edge,
+ * Pins children to the bottom-end of the current screen with M3 spacing: 16dp from the trailing edge,
  * and 16dp + bottom safe-area above system nav when there is no tab bar; when the app shell tab bar is present,
  * adds {@link TAB_BAR_VISUAL_HEIGHT} so the FAB clears the bar (plus the same 16dp + inset rule relative to that chrome).
  */
@@ -58,15 +59,15 @@ export function FloatingFabContainer({ children, style, ...rest }: FloatingFabCo
   const { fabBottomMargin, rightMargin } = useFloatingFabOffsets()
   return (
     <view
+      flatten={false}
+      overlap
       className="FloatingFabContainer"
       style={{
-        // Keep floating chrome inside the current screen's stacking context so pushed
-        // nav-screens animate their own FABs instead of anchoring to the global viewport.
-        position: 'absolute',
+        position: 'fixed',
         right: px(rightMargin),
         bottom: px(fabBottomMargin),
-        zIndex: 10000,
         overflow: 'visible',
+        zIndex: FAB_FLOAT_Z,
         ...(style as object ?? {}),
       }}
       {...rest}
@@ -81,8 +82,8 @@ export interface FloatingFabMenuHostProps extends ViewProps {
 }
 
 /**
- * Full-screen layer (fills the current positioned ancestor, usually the screen) for the dimmed
- * scrim. {@link FabMenu} pins its trigger and action column with `position: fixed` + {@link useFloatingFabOffsets}.
+ * Full-screen layer pinned to the current screen for the dimmed scrim. {@link FabMenu} pins its
+ * trigger and action column to that same screen viewport.
  */
 export function FloatingFabMenuHost({ children, style, ...rest }: FloatingFabMenuHostProps) {
   return (
@@ -91,13 +92,13 @@ export function FloatingFabMenuHost({ children, style, ...rest }: FloatingFabMen
       overlap
       className="FloatingFabMenuHost"
       style={{
-        position: 'absolute',
+        position: 'fixed',
         left: '0px',
         top: '0px',
         right: '0px',
         bottom: '0px',
         overflow: 'visible',
-        zIndex: 10000,
+        zIndex: FAB_FLOAT_Z,
         ...(style as object ?? {}),
       }}
       {...rest}

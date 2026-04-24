@@ -54,6 +54,9 @@ const ITEM_PADDING_START = 16
 const ITEM_PADDING_END = 12
 const DRAWER_PADDING_H = 28
 const DRAWER_HEADER_INSET = 28
+const DRAWER_LAYER_Z = 10020
+const DRAWER_SCRIM_Z = DRAWER_LAYER_Z
+const DRAWER_PANEL_Z = DRAWER_LAYER_Z + 10
 
 export function NavigationDrawer({
   open,
@@ -82,85 +85,121 @@ export function NavigationDrawer({
   if (!open) return null
 
   return (
-    <view style={{ position: 'fixed', left: '0px', top: '0px', right: '0px', bottom: '0px', zIndex: 1000, display: 'flex', flexDirection: 'row' }} {...rest}>
-      {/* Drawer panel */}
+    <view
+      flatten={false}
+      overlap
+      className="M3Drawer-layer"
+      style={{
+        position: 'fixed',
+        left: '0px',
+        top: '0px',
+        right: '0px',
+        bottom: '0px',
+        display: 'flex',
+        flexDirection: 'row',
+        minHeight: '100vh',
+        zIndex: DRAWER_LAYER_Z,
+      }}
+      {...rest}
+    >
       <view
-        className="M3Drawer-panel"
-        style={{
-          width: px(DRAWER_WIDTH),
-          height: '100%',
-          backgroundColor: surface,
-          borderTopRightRadius: px(DRAWER_RADIUS),
-          borderBottomRightRadius: px(DRAWER_RADIUS),
-          display: 'flex',
-          flexDirection: 'column',
-          ...(shouldApplyTopInset ? { paddingTop: px(insets.top/2) } : {}),
-          paddingBottom: px(12),
-          overflow: 'hidden',
-          ...(style as object ?? {}),
-        }}
-      >
-        {/* Headline */}
-        {headline ? (
-          <view style={{ paddingLeft: px(DRAWER_HEADER_INSET), paddingRight: px(DRAWER_HEADER_INSET), paddingTop: px(16), paddingBottom: px(16) }}>
-            <text style={{
-              fontSize: px(14),
-              fontWeight: '500',
-              lineHeight: px(20),
-              color: onSurface,
-            }}>{headline}</text>
-          </view>
-        ) : null}
-
-        {/* Scrollable sections */}
-        <scroll-view scroll-y style={{ flex: 1 }}>
-          {sections.map((section, si) => (
-            <view key={si}>
-              {section.title ? (
-                <view style={{ paddingLeft: px(DRAWER_HEADER_INSET), paddingRight: px(DRAWER_HEADER_INSET), paddingTop: px(si > 0 ? 12 : 8), paddingBottom: px(8) }}>
-                  <text style={{
-                    fontSize: px(14),
-                    fontWeight: '500',
-                    lineHeight: px(20),
-                    color: onSurface,
-                  }}>{section.title}</text>
-                </view>
-              ) : null}
-              {/* Divider between sections */}
-              {si > 0 && !section.title ? (
-                <view style={{ height: '1px', backgroundColor: theme.outlineVariant, marginLeft: px(DRAWER_PADDING_H), marginRight: px(DRAWER_PADDING_H), marginTop: px(16), marginBottom: px(8) }} />
-              ) : null}
-              {section.items.map((item) => {
-                const isActive = selected === item.value
-                return (
-                  <DrawerItemRow
-                    key={item.value}
-                    item={item}
-                    isActive={isActive}
-                    selectedContainer={selectedContainer}
-                    selectedIcon={selectedIcon}
-                    selectedLabel={selectedLabel}
-                    onSurface={onSurface}
-                    onSurfaceVariant={onSurfaceVariant}
-                    onTap={() => onSelect?.(item.value)}
-                  />
-                )
-              })}
-            </view>
-          ))}
-        </scroll-view>
-      </view>
-
-      {/* Scrim */}
-      <view
+        flatten={false}
+        overlap
         className="M3Drawer-scrim"
         style={{
-          flex: 1,
-          height: '100%',
+          position: 'fixed',
+          left: '0px',
+          top: '0px',
+          right: '0px',
+          bottom: '0px',
           backgroundColor: scrimColor,
+          minWidth: '100vw',
+          minHeight: '100vh',
+          zIndex: DRAWER_SCRIM_Z,
         }}
         bindtap={onClose}
       />
+
+      <view
+        flatten={false}
+        overlap
+        style={{
+          position: 'fixed',
+          left: '0px',
+          top: '0px',
+          bottom: '0px',
+          display: 'flex',
+          flexDirection: 'column',
+          zIndex: DRAWER_PANEL_Z,
+        }}
+      >
+        <view
+          className="M3Drawer-panel"
+          style={{
+            width: px(DRAWER_WIDTH),
+            minHeight: '100%',
+            backgroundColor: surface,
+            borderTopRightRadius: px(DRAWER_RADIUS),
+            borderBottomRightRadius: px(DRAWER_RADIUS),
+            display: 'flex',
+            flexDirection: 'column',
+            ...(shouldApplyTopInset ? { paddingTop: px(insets.top / 2) } : {}),
+            paddingBottom: px(12),
+            overflow: 'hidden',
+            ...(style as object ?? {}),
+          }}
+        >
+          {/* Headline */}
+          {headline ? (
+            <view style={{ paddingLeft: px(DRAWER_HEADER_INSET), paddingRight: px(DRAWER_HEADER_INSET), paddingTop: px(16), paddingBottom: px(16) }}>
+              <text style={{
+                fontSize: px(14),
+                fontWeight: '500',
+                lineHeight: px(20),
+                color: onSurface,
+              }}>{headline}</text>
+            </view>
+          ) : null}
+
+          {/* Scrollable sections */}
+          <scroll-view scroll-y style={{ flex: 1 }}>
+            {sections.map((section, si) => (
+              <view key={si}>
+                {section.title ? (
+                  <view style={{ paddingLeft: px(DRAWER_HEADER_INSET), paddingRight: px(DRAWER_HEADER_INSET), paddingTop: px(si > 0 ? 12 : 8), paddingBottom: px(8) }}>
+                    <text style={{
+                      fontSize: px(14),
+                      fontWeight: '500',
+                      lineHeight: px(20),
+                      color: onSurface,
+                    }}>{section.title}</text>
+                  </view>
+                ) : null}
+                {/* Divider between sections */}
+                {si > 0 && !section.title ? (
+                  <view style={{ height: '1px', backgroundColor: theme.outlineVariant, marginLeft: px(DRAWER_PADDING_H), marginRight: px(DRAWER_PADDING_H), marginTop: px(16), marginBottom: px(8) }} />
+                ) : null}
+                {section.items.map((item) => {
+                  const isActive = selected === item.value
+                  return (
+                    <DrawerItemRow
+                      key={item.value}
+                      item={item}
+                      isActive={isActive}
+                      selectedContainer={selectedContainer}
+                      selectedIcon={selectedIcon}
+                      selectedLabel={selectedLabel}
+                      onSurface={onSurface}
+                      onSurfaceVariant={onSurfaceVariant}
+                      onTap={() => onSelect?.(item.value)}
+                    />
+                  )
+                })}
+              </view>
+            ))}
+          </scroll-view>
+        </view>
+      </view>
     </view>
   )
 }

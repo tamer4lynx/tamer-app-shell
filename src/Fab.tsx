@@ -1,10 +1,10 @@
 /// <reference types="@lynx-js/react" />
-import { useState } from '@lynx-js/react'
+import { Fragment, useState } from '@lynx-js/react'
 import '@tamer4lynx/tamer-icons'
 import type { IconSet } from '@tamer4lynx/tamer-icons'
 import type { ViewProps } from '@lynx-js/types'
 import { px } from './index.js'
-import { useFloatingFabOffsets } from './floatingFab.js'
+import { FAB_FLOAT_Z, useFloatingFabOffsets } from './floatingFab.js'
 import { useM3ThemeTokens } from './theme.js'
 
 /**
@@ -26,9 +26,6 @@ export interface FabProps extends ViewProps {
     icon?: string
   }
 }
-
-/** FAB surfaces sit above typical page content (e.g. nav overlays). */
-const FAB_Z = 10000
 
 const FAB_DIMS: Record<FabSize, { size: number; icon: number; radius: number }> = {
   small:   { size: 40, icon: 24, radius: 12 },
@@ -63,7 +60,7 @@ export function Fab({
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
-        // zIndex: FAB_Z,
+        zIndex: FAB_FLOAT_Z,
         ...(style as object ?? {}),
       }}
       bindtap={onTap}
@@ -140,7 +137,7 @@ export function ExtendedFab({
         flexGrow: 0,
         flexShrink: 0,
         overflow: 'hidden',
-        // zIndex: FAB_Z,
+        zIndex: FAB_FLOAT_Z,
         ...(style as object ?? {}),
       }}
       bindtap={onTap}
@@ -172,7 +169,7 @@ export function ExtendedFab({
 /**
  * M3 FAB Menu per https://m3.material.io/components/fab-menu/specs
  *
- * A FAB that expands to show a vertical list of action items.
+ * A FAB that expands to show a vertical list of action items pinned to the current screen.
  */
 
 export interface FabMenuItem {
@@ -203,9 +200,10 @@ const MENU_ITEM_ICON = 24
 const FAB_MENU_TRIGGER_SIZE = 56
 const FAB_MENU_STACK_GAP = 8
 
-/** Scrim, then speed-dial rows, then trigger; all within the FAB layer (each ≥ FAB_Z). */
-const FAB_MENU_SCRIM_Z = FAB_Z
-const FAB_MENU_TRIGGER_Z = FAB_Z + 20
+/** Scrim, then speed-dial rows, then trigger; all within the current screen tree. */
+const FAB_MENU_SCRIM_Z = FAB_FLOAT_Z
+const FAB_MENU_STACK_Z = FAB_FLOAT_Z + 10
+const FAB_MENU_TRIGGER_Z = FAB_FLOAT_Z + 20
 
 export function FabMenu({
   icon,
@@ -229,7 +227,7 @@ export function FabMenu({
   const trigger = (
     <view
       data-testid="fab-menu-trigger"
-      className={`M3FabMenu-trigger M3ElevatedSurface${fabPressed ? ' M3Fab--pressed' : ''}`}
+      // className={`M3FabMenu-trigger M3ElevatedSurface${fabPressed ? ' M3Fab--pressed' : ''}`}
       style={{
         width: px(FAB_MENU_TRIGGER_SIZE),
         height: px(FAB_MENU_TRIGGER_SIZE),
@@ -254,71 +252,84 @@ export function FabMenu({
     </view>
   )
 
-  const scrim = open ? (
+  const stack = (
     <view
       flatten={false}
       overlap
-      className="M3FabMenu-scrim"
+      className="M3FabMenu-hitTarget"
       style={{
-        position: 'absolute',
-        left: '0px',
-        top: '0px',
-        right: '0px',
-        bottom: '0px',
-        backgroundColor: scrimColor,
-        zIndex: FAB_MENU_SCRIM_Z,
+        position: 'fixed',
+        right: px(fabOff.rightMargin),
+        bottom: px(fabOff.fabBottomMargin),
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        alignItems: 'flex-end',
+        gap: px(FAB_MENU_STACK_GAP),
+        minWidth: px(FAB_MENU_TRIGGER_SIZE),
+        overflow: 'visible',
+        zIndex: FAB_MENU_STACK_Z,
+        ...(style as object ?? {}),
       }}
-      bindtap={() => setOpen(false)}
-    />
-  ) : null
+      {...rest}
+    >
+      {open
+        ? items.map((item, i) => (
+            <view
+              key={i}
+              className="M3FabMenu-pillLift"
+              style={{ animationDelay: `${(items.length - 1 - i) * 28}ms` }}
+            >
+              <FabMenuRow
+                itemIndex={i}
+                item={item}
+                bg={itemBg}
+                fg={itemFg}
+                iconColor={itemIcon}
+                onTap={() => { item.onTap(); setOpen(false) }}
+              />
+            </view>
+          ))
+        : null}
+      {trigger}
+    </view>
+  )
 
-  return (
-    <>
-      {scrim}
+  if (open) {
+    return (
       <view
         flatten={false}
         overlap
-        className="M3FabMenu-hitTarget"
+        className="FloatingFabMenuHost"
         style={{
-          position: 'absolute',
-          right: px(fabOff.rightMargin),
-          bottom: px(fabOff.fabBottomMargin),
-          zIndex: FAB_MENU_TRIGGER_Z,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          alignItems: 'flex-end',
-          gap: px(FAB_MENU_STACK_GAP),
-          minWidth: px(FAB_MENU_TRIGGER_SIZE),
+          position: 'fixed',
+          left: '0px',
+          top: '0px',
+          right: '0px',
+          bottom: '0px',
           overflow: 'visible',
-          ...(style as object ?? {}),
+          zIndex: FAB_MENU_SCRIM_Z,
         }}
-        {...rest}
       >
-        {open
-          ? items.map((item, i) => (
-              <view
-                key={i}
-                className="M3FabMenu-pillLift"
-                style={{
-                  animationDelay: `${(items.length - 1 - i) * 28}ms`,
-                }}
-              >
-                <FabMenuRow
-                  itemIndex={i}
-                  item={item}
-                  bg={itemBg}
-                  fg={itemFg}
-                  iconColor={itemIcon}
-                  onTap={() => { item.onTap(); setOpen(false) }}
-                />
-              </view>
-            ))
-          : null}
-        {trigger}
+        <view
+          className="M3FabMenu-scrim"
+          style={{
+            position: 'absolute',
+            left: '0px',
+            top: '0px',
+            right: '0px',
+            bottom: '0px',
+            backgroundColor: scrimColor,
+            zIndex: FAB_MENU_SCRIM_Z,
+          }}
+          bindtap={() => setOpen(false)}
+        />
+        {stack}
       </view>
-    </>
-  )
+    )
+  }
+
+  return stack
 }
 
 function FabMenuRow({

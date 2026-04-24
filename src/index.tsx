@@ -160,7 +160,6 @@ export function AppBar({
         justifyContent: 'space-between',
         alignItems: 'center',
         flexShrink: 0,
-        zIndex: 500,
         ...(style as object ?? {}),
       }}
       {...rest}
@@ -316,7 +315,6 @@ export function TabBar({ tabs, iconColor, style, ...rest }: TabBarProps) {
               paddingBottom: '0px',
               paddingTop: '0px',
               bottom: '-50px',
-              zIndex: 500,
             }
           : { display: 'flex', flexShrink: 0, paddingBottom: px(insets.bottom) },
         ...(style as object ?? {}),
