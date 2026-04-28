@@ -49,9 +49,12 @@ Typically used via **tamer-router** `Stack` and `Tabs` layouts, which compose Ap
 | Component | Props | Description |
 |-----------|-------|-------------|
 | `AppShellProvider` | `showAppBar?`, `showTabBar?`, `barHeight?` | Context for app chrome visibility |
-| `AppBar` | `title?`, `barHeight?`, `leftAction?`, `rightActions?`, `foregroundColor?`, `actionColor?` | Top app bar |
-| `TabBar` | `tabs`, `style?`, `iconColor?` | Bottom tab bar |
-| `Content` | ViewProps | Main content area |
+| `AppBar` | `title?`, `barHeight?`, `leftAction?`, `rightActions?`, `foregroundColor?`, `actionColor?` | Top app bar that cancels the top safe-area inset when wrapped in `SafeArea` |
+| `TabBar` | `tabs`, `style?`, `iconColor?` | Bottom tab bar that cancels the bottom safe-area inset when wrapped in `SafeArea` |
+| `Content` | ViewProps | Main content area that flexes to fill the remaining space between chrome bars |
+| `Fab` | `icon`, `iconSet?`, `size?`, `floating?`, `colors?` | Floating action button. In-flow by default; set `floating` to pin to screen bottom-end |
+| `ExtendedFab` | `label`, `icon?`, `iconSet?`, `floating?`, `colors?` | Extended FAB. In-flow by default; set `floating` to pin to screen bottom-end |
+| `FabMenu` | `icon`, `iconSet?`, `items`, `floating?`, `colors?` | FAB menu. In-flow by default; set `floating` for fixed screen positioning and fullscreen scrim |
 | `Screen` | ViewProps | Full-screen container (re-export from tamer-screen) |
 | `SafeArea` | ViewProps, `edges?` | Safe area wrapper (re-export from tamer-screen) |
 

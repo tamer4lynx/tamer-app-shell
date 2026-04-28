@@ -6,8 +6,10 @@ export interface AppShellContextValue {
   barHeight: number
 }
 
-export const AppShellContext = createContext<AppShellContextValue | null>(null)
+type LynxContextType = ReturnType<typeof createContext>
+
+export const AppShellContext = createContext<AppShellContextValue | null>(null) as LynxContextType
 
 export function useAppShellContext() {
-  return useContext(AppShellContext)
+  return useContext(AppShellContext) as AppShellContextValue | null
 }

@@ -1,5 +1,5 @@
 /// <reference types="@lynx-js/react" />
-import { Fragment, useState } from '@lynx-js/react'
+import { useState } from '@lynx-js/react'
 import '@tamer4lynx/tamer-icons'
 import type { IconSet } from '@tamer4lynx/tamer-icons'
 import type { ViewProps } from '@lynx-js/types'
@@ -20,6 +20,8 @@ export interface FabProps extends ViewProps {
   icon: string
   iconSet?: IconSet
   size?: FabSize
+  /** When true, pins the FAB to the screen bottom-end using app-shell FAB offsets. Defaults to in-flow layout. */
+  floating?: boolean
   onTap?: () => void
   colors?: {
     container?: string
@@ -37,6 +39,7 @@ export function Fab({
   icon,
   iconSet = 'material',
   size = 'regular',
+  floating = false,
   onTap,
   colors,
   style,
@@ -44,9 +47,18 @@ export function Fab({
 }: FabProps) {
   const [pressed, setPressed] = useState(false)
   const theme = useM3ThemeTokens()
+  const fabOff = useFloatingFabOffsets()
   const d = FAB_DIMS[size]
   const bg = colors?.container ?? theme.primaryContainer
   const fg = colors?.icon ?? theme.onPrimaryContainer
+  const floatingStyle: ViewProps['style'] = floating
+    ? {
+        position: 'fixed',
+        right: px(fabOff.rightMargin),
+        bottom: px(fabOff.fabBottomMargin),
+        zIndex: FAB_FLOAT_Z,
+      }
+    : {}
 
   return (
     <view
@@ -60,7 +72,7 @@ export function Fab({
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
-        zIndex: FAB_FLOAT_Z,
+        ...floatingStyle,
         ...(style as object ?? {}),
       }}
       bindtap={onTap}
@@ -91,6 +103,8 @@ export interface ExtendedFabProps extends ViewProps {
   label: string
   icon?: string
   iconSet?: IconSet
+  /** When true, pins the extended FAB to the screen bottom-end using app-shell FAB offsets. Defaults to in-flow layout. */
+  floating?: boolean
   onTap?: () => void
   colors?: {
     container?: string
@@ -108,6 +122,7 @@ export function ExtendedFab({
   label,
   icon,
   iconSet = 'material',
+  floating = false,
   onTap,
   colors,
   style,
@@ -115,9 +130,18 @@ export function ExtendedFab({
 }: ExtendedFabProps) {
   const [pressed, setPressed] = useState(false)
   const theme = useM3ThemeTokens()
+  const fabOff = useFloatingFabOffsets()
   const bg = colors?.container ?? theme.primaryContainer
   const fg = colors?.label ?? theme.onPrimaryContainer
   const iconC = colors?.icon ?? fg
+  const floatingStyle: ViewProps['style'] = floating
+    ? {
+        position: 'fixed',
+        right: px(fabOff.rightMargin),
+        bottom: px(fabOff.fabBottomMargin),
+        zIndex: FAB_FLOAT_Z,
+      }
+    : {}
 
   return (
     <view
@@ -137,7 +161,7 @@ export function ExtendedFab({
         flexGrow: 0,
         flexShrink: 0,
         overflow: 'hidden',
-        zIndex: FAB_FLOAT_Z,
+        ...floatingStyle,
         ...(style as object ?? {}),
       }}
       bindtap={onTap}
@@ -169,7 +193,8 @@ export function ExtendedFab({
 /**
  * M3 FAB Menu per https://m3.material.io/components/fab-menu/specs
  *
- * A FAB that expands to show a vertical list of action items pinned to the current screen.
+ * A FAB that expands to show a vertical list of action items. It stays in normal layout flow
+ * by default; set `floating` to pin it to the current screen.
  */
 
 export interface FabMenuItem {
@@ -183,6 +208,8 @@ export interface FabMenuProps extends ViewProps {
   icon: string
   iconSet?: IconSet
   items: FabMenuItem[]
+  /** When true, pins the trigger/menu to the screen and shows a fullscreen scrim while open. Defaults to in-flow layout. */
+  floating?: boolean
   colors?: {
     fabContainer?: string
     fabIcon?: string
@@ -209,6 +236,7 @@ export function FabMenu({
   icon,
   iconSet = 'material',
   items,
+  floating = false,
   colors,
   style,
   ...rest
@@ -223,6 +251,16 @@ export function FabMenu({
   const itemFg = colors?.itemLabel ?? theme.onSecondaryContainer
   const itemIcon = colors?.itemIcon ?? theme.onSecondaryContainer
   const scrimColor = colors?.scrim ?? 'rgba(0,0,0,0.32)'
+  const stackPositionStyle: ViewProps['style'] = floating
+    ? {
+        position: 'fixed',
+        right: px(fabOff.rightMargin),
+        bottom: px(fabOff.fabBottomMargin),
+        zIndex: FAB_MENU_STACK_Z,
+      }
+    : {
+        position: 'relative',
+      }
 
   const trigger = (
     <view
@@ -258,9 +296,7 @@ export function FabMenu({
       overlap
       className="M3FabMenu-hitTarget"
       style={{
-        position: 'fixed',
-        right: px(fabOff.rightMargin),
-        bottom: px(fabOff.fabBottomMargin),
+        ...stackPositionStyle,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-end',
@@ -268,7 +304,6 @@ export function FabMenu({
         gap: px(FAB_MENU_STACK_GAP),
         minWidth: px(FAB_MENU_TRIGGER_SIZE),
         overflow: 'visible',
-        zIndex: FAB_MENU_STACK_Z,
         ...(style as object ?? {}),
       }}
       {...rest}
@@ -295,7 +330,7 @@ export function FabMenu({
     </view>
   )
 
-  if (open) {
+  if (open && floating) {
     return (
       <view
         flatten={false}
