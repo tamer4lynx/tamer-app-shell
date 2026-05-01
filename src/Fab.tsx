@@ -1,7 +1,6 @@
 /// <reference types="@lynx-js/react" />
 import { useState } from '@lynx-js/react'
-import '@tamer4lynx/tamer-icons'
-import type { IconSet } from '@tamer4lynx/tamer-icons'
+import type { IconSet } from './tamer-icons.js'
 import type { ViewProps } from '@lynx-js/types'
 import { px } from './index.js'
 import { FAB_FLOAT_Z, useFloatingFabOffsets } from './floatingFab.js'

@@ -1,7 +1,6 @@
 /// <reference types="@lynx-js/react" />
 import { useState } from '@lynx-js/react'
-import '@tamer4lynx/tamer-icons'
-import type { IconSet } from '@tamer4lynx/tamer-icons'
+import type { IconSet } from './tamer-icons.js'
 import { useInsets } from '@tamer4lynx/tamer-insets'
 import { useSafeAreaContext } from '@tamer4lynx/tamer-screen'
 import type { ViewProps } from '@lynx-js/types'
