@@ -77,6 +77,7 @@ export function NavigationRail({
       className={`M3NavRail${expanded ? ' M3NavRail--expanded' : ' M3NavRail--collapsed'}`}
       style={{
         width: px(railWidth),
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: expanded ? 'stretch' : 'center',
@@ -104,16 +105,18 @@ export function NavigationRail({
         </view>
       ) : null}
 
-      {/* Items */}
-      <view style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: expanded ? 'stretch' : 'center',
-        justifyContent: justifyMap[align],
-        gap: px(RAIL_ITEM_SPACING),
-        width: '100%',
-      }}>
+      <view
+        style={{
+          flex: 1,
+          minHeight: '0px',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: expanded ? 'stretch' : 'center',
+          justifyContent: justifyMap[align],
+          gap: px(RAIL_ITEM_SPACING),
+        }}
+      >
         {items.map((item) => {
           const isActive = selected === item.value
           return (

@@ -294,7 +294,7 @@ function TabBarItem({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        flex: 1,
+        width: "100%",
         paddingTop: px(12),
         paddingBottom: px(16),
       }}
@@ -387,6 +387,7 @@ export function TabBar({
           ? hiddenStyle
           : {
               display: "flex",
+              flexDirection: "column",
               flexShrink: 0,
               width: "100%",
             }),
@@ -396,15 +397,43 @@ export function TabBar({
       }}
       {...rest}
     >
-      {tabs.map((item, i) => (
-        <TabBarItem
-          key={i}
-          item={item}
-          isActive={item.active === true}
-          onTap={() => item.onTap?.()}
-          iconColor={iconColor}
-        />
-      ))}
+      <list
+        scroll-orientation="horizontal"
+        list-type="single"
+        span-count={1}
+        preload-buffer-count={0}
+        enable-scroll={tabs.length > 5}
+        style={{
+          width: "100%",
+          height: px(NAV_BAR_HEIGHT),
+          listMainAxisGap: "0px",
+        }}
+      >
+        {tabs.map((item, i) => {
+          const share = 100 / Math.max(tabs.length, 1)
+          const estMain = Math.max(
+            72,
+            Math.floor(400 / Math.max(tabs.length, 1)),
+          )
+          return (
+            <list-item
+              key={`tab-${i}-${item.icon}-${item.label ?? ""}`}
+              item-key={`tab-${i}-${item.icon}-${item.label ?? ""}`}
+              estimated-main-axis-size-px={estMain}
+              style={{
+                width: `${share.toFixed(6)}%`,
+              }}
+            >
+              <TabBarItem
+                item={item}
+                isActive={item.active === true}
+                onTap={() => item.onTap?.()}
+                iconColor={iconColor}
+              />
+            </list-item>
+          )
+        })}
+      </list>
     </view>
   );
 }
