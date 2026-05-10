@@ -2,6 +2,7 @@
 import "./app-shell.css";
 import { createContext, useContext, useState } from "@lynx-js/react";
 import { useInsets, useKeyboard } from "@tamer4lynx/tamer-insets";
+import { ensureContrast } from "@tamer4lynx/tamer-system-ui";
 import { useSafeAreaContext } from "@tamer4lynx/tamer-screen";
 import type { IconSet } from "./tamer-icons.js";
 import "./tamer-icons.js";
@@ -103,7 +104,7 @@ export function AppBar({
   barHeight = DEFAULT_BAR_HEIGHT,
   leftAction,
   rightActions = [],
-  foregroundColor = "#fff",
+  foregroundColor,
   actionColor,
   style,
   children,
@@ -116,8 +117,23 @@ export function AppBar({
   const router = useAppShellRouter();
   const back = router?.back ?? (() => {});
   const canGoBack = router?.canGoBack ?? (() => false);
-  const resolvedTitleColor = foregroundColor;
-  const resolvedActionColor = actionColor ?? foregroundColor;
+  const theme = useM3ThemeTokens();
+  // Caller may pass an arbitrary backgroundColor via `style` that doesn't match
+  // any theme token. In that case we still need a contrast safety net.
+  // For pure-theme backgrounds, `theme.onSurface` is already validated by
+  // `tamer-system-ui` against `theme.surface`.
+  const styleBg =
+    typeof style === "object" && style != null
+      ? ((style as { backgroundColor?: string }).backgroundColor ?? null)
+      : null;
+  const barBg = styleBg ?? theme.surface ?? "#000";
+  const autoForeground = ensureContrast(theme.onSurface ?? "#fff", barBg, {
+    darkFallback: "#000",
+    lightFallback: "#fff",
+    minRatio: 4.5,
+  });
+  const resolvedTitleColor = foregroundColor ?? autoForeground;
+  const resolvedActionColor = actionColor ?? foregroundColor ?? autoForeground;
 
   const showDefaultBack = leftAction === undefined && canGoBack();
   const left =
@@ -277,11 +293,15 @@ function TabBarItem({
 }) {
   const theme = useM3ThemeTokens();
   const [pressed, setPressed] = useState(false);
+  // Active icon/label sit inside the pill so they pair with `secondaryContainer`,
+  // not the bar bg. The theme tokens are pre-validated by tamer-system-ui's
+  // `validateContrastPairs`, so `onSecondaryContainer` is guaranteed to contrast
+  // `secondaryContainer` even when the host injects mismatched colors.
   const iconC = isActive
-    ? (iconColor.active ?? theme.primary)
+    ? (iconColor.active ?? theme.onSecondaryContainer ?? "#000")
     : (iconColor.inactive ?? theme.onSurfaceVariant);
   const labelC = isActive
-    ? ((iconColor as any).labelActive ?? theme.primary)
+    ? ((iconColor as any).labelActive ?? theme.onSecondaryContainer ?? "#000")
     : ((iconColor as any).labelInactive ?? theme.onSurfaceVariant);
   const pillBg = isActive
     ? ((iconColor as any).pill ?? theme.secondaryContainer)

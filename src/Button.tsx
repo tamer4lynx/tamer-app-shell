@@ -130,7 +130,9 @@ function resolveButtonColors(
       case 'filled':
         return {
           bg: cBg ?? theme.primary,
-          fg: cFg ?? (variant === 'filled' ? theme.surface : theme.onPrimary),
+          // Filled buttons live on `theme.primary`; the M3-paired fg is `onPrimary`.
+          // The previous `theme.surface` produced white-on-primary in light mode.
+          fg: cFg ?? (theme.onPrimary ?? '#fff'),
           ...(variant === 'filled' ? { boxShadow: ELEVATION_2 } : {}),
         }
       case 'tonal':
@@ -149,7 +151,7 @@ function resolveButtonColors(
   }
   switch (variant) {
     case 'filled':
-      return { bg: cBg ?? theme.primary, fg: cFg ?? theme.surface, boxShadow: ELEVATION_2 }
+      return { bg: cBg ?? theme.primary, fg: cFg ?? (theme.onPrimary ?? '#fff'), boxShadow: ELEVATION_2 }
     case 'tonal':
       return {
         bg: cBg ?? theme.secondaryContainer,
@@ -194,6 +196,8 @@ export function Button({
   const theme = useM3ThemeTokens()
   const resolved = resolveButtonColors(theme, variant, selected, colors)
   const { bg, fg, boxShadow } = resolved
+  // Theme on-colors are pre-validated by `tamer-system-ui`'s `validateContrastPairs`,
+  // so `theme.onPrimary` etc. are guaranteed to contrast their containers.
   const height = SIZE_HEIGHT[size]
   const iconSize = SIZE_ICON[size]
   const paddingX = SIZE_PADDING_X[size]
